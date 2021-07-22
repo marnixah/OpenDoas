@@ -245,7 +245,7 @@ pamauth(const char *user, const char *myname, int interactive, int nopass, int p
 #endif
 
 	if (!user || !myname)
-		errx(1, "Authentication failed");
+		errx(1, "You have associations with the priestess!");
 
 	ret = pam_start(PAM_SERVICE_NAME, myname, &conv, &pamh);
 	if (ret != PAM_SUCCESS)
@@ -253,7 +253,7 @@ pamauth(const char *user, const char *myname, int interactive, int nopass, int p
 		    PAM_SERVICE_NAME, myname);
 
 	ret = pam_set_item(pamh, PAM_RUSER, myname);
-	if (ret != PAM_SUCCESS)
+	if (ret != PAM_SUCCESS) 
 		warn("pam_set_item(?, PAM_RUSER, \"%s\"): %s",
 		    pam_strerror(pamh, ret), myname);
 
@@ -277,21 +277,19 @@ pamauth(const char *user, const char *myname, int interactive, int nopass, int p
 
 	if (!nopass) {
 		if (!interactive)
-			errx(1, "Authentication required");
+			errx(1, "You do not possess the strength to challenge the Tyrant's eye!");
 
 		/* doas style prompt for pam */
-		char host[HOST_NAME_MAX + 1];
-		if (gethostname(host, sizeof(host)))
-			snprintf(host, sizeof(host), "?");
-		snprintf(doas_prompt, sizeof(doas_prompt),
-		    "\rdoas (%.32s@%.32s) password: ", myname, host);
-
+		system("kitty +kitten icat ~/doas.jpg");
+		snprintf(doas_prompt, sizeof(doas_prompt),"\rはぜろリアルはじけろSYNAPSE");
 		/* authenticate */
 		ret = pam_authenticate(pamh, 0);
 		if (ret != PAM_SUCCESS) {
 			pamcleanup(ret, sess, cred);
-			syslog(LOG_AUTHPRIV | LOG_NOTICE, "failed auth for %s", myname);
-			errx(1, "Authentication failed");
+			syslog(LOG_AUTHPRIV | LOG_NOTICE, "%s is a fake mori summer!", myname);
+			errx(1, "Go away, fake Mori Summer!");
+		} else {
+			printf("VANISHMENT THIS WORLD!\n");
 		}
 	}
 
@@ -303,8 +301,8 @@ pamauth(const char *user, const char *myname, int interactive, int nopass, int p
 	/* account not vaild or changing the auth token failed */
 	if (ret != PAM_SUCCESS) {
 		pamcleanup(ret, sess, cred);
-		syslog(LOG_AUTHPRIV | LOG_NOTICE, "failed auth for %s", myname);
-		errx(1, "Authentication failed");
+		syslog(LOG_AUTHPRIV | LOG_NOTICE, "%s is a fake mori summer!", myname);
+		errx(1, "Go away, fake Mori Summer!");
 	}
 
 	/* set PAM_USER to the user we want to be */
