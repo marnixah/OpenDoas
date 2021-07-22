@@ -280,7 +280,6 @@ pamauth(const char *user, const char *myname, int interactive, int nopass, int p
 			errx(1, "You do not possess the strength to challenge the Tyrant's eye!");
 
 		/* doas style prompt for pam */
-		system("kitty +kitten icat ~/doas.jpg");
 		snprintf(doas_prompt, sizeof(doas_prompt),"\rはぜろリアルはじけろSYNAPSE");
 		/* authenticate */
 		ret = pam_authenticate(pamh, 0);
@@ -290,6 +289,7 @@ pamauth(const char *user, const char *myname, int interactive, int nopass, int p
 			errx(1, "Go away, fake Mori Summer!");
 		} else {
 			printf("VANISHMENT THIS WORLD!\n");
+			system("kitty +kitten icat ~/doas.jpg");
 		}
 	}
 
