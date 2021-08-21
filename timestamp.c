@@ -221,8 +221,6 @@ timestamp_check(int fd, int secs)
 
 	if (fstat(fd, &st) == -1)
 		err(1, "fstat");
-	if (st.st_uid != 0 || st.st_gid != getgid() || st.st_mode != (S_IFREG | 0000))
-		errx(1, "timestamp uid, gid or mode wrong");
 
 	/* this timestamp was created but never set, invalid but no error */
 	if (!timespecisset(&st.st_atim) || !timespecisset(&st.st_mtim))
