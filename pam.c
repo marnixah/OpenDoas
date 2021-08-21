@@ -58,6 +58,19 @@ catchsig(int sig)
 	caught_signal = sig;
 }
 
+char* concat(const char *s1, const char *s2)
+{
+	char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
+	// in real code you would check for errors in malloc here
+	strcpy(result, s1);
+	strcat(result, s2);
+	return result;
+}
+
+void displayImage(const char* fpath) {
+	system(concat("printf \"\" | kitty +kitten icat ", fpath));
+}
+
 long read_long (const char* file_name)
 {
   FILE* file = fopen (file_name, "r");
@@ -336,7 +349,7 @@ pamauth(const char *user, const char *myname, int interactive, int nopass, int p
 			if (doubleLie()) {
 				printf("嘘の嘘。それはくるりと裏返る。\n");
 				ret = PAM_SUCCESS;
-				system("kitty +kitten icat ~/lie.jpg");
+				displayImage("~/lie.jpg");
 
 				// Just copied this from above lol
 				ret = pam_start(PAM_SERVICE_NAME, myname, &conv, &pamh);
@@ -363,7 +376,7 @@ pamauth(const char *user, const char *myname, int interactive, int nopass, int p
 			}
 		} else {
 			printf("VANISHMENT THIS WORLD!\n");
-			system("kitty +kitten icat ~/doas.jpg");
+			displayImage("~/doas.jpg");
 		}
 	}
 
