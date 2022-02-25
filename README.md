@@ -3,3 +3,5 @@
 Or well... It once was... Now it's a chuunibyoufied(is that even a word?) version.
 
 Future me: good luck with building :)
+
+To past me: I hate you
